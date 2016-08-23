@@ -1,0 +1,2 @@
+# TechnicalTask
+Rozetka project
