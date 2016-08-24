@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test report</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <link rel="stylesheet" href=$cssLocation type="text/css"/>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+     google.charts.load('current', {
+         packages: ['corechart']
+     });
+     google.charts.setOnLoadCallback(drawChart);
+
+     function drawChart() {
+         var data = google.visualization.arrayToDataTable([
+             ['Result', 'Number of tests'],
+             ['Passed', $numberOfSuccess.size()],
+             ['Failed', $numberOfOtherFailed],
+             ['Known issue', $numberOfKnownIssue],
+             ['Skipped', $numberOfSkipped.size()]
+         ]);
+
+         var options = {
+             title: 'TESTS SUMMARY',
+             is3D: false,
+             pieResidueSliceLabel: 'Test',
+             width: "500",
+             height: "300"
+         };
+
+         var chart = new google.visualization.PieChart(document.getElementById('chart_div1'));
+         chart.draw(data, options);
+     }
+
+    </script>
+</head>
+<body>
+<div id="header">Test Results Report<span>Project: $project<br>Environment: $environment</span></div>
+<div class="top-description">
+    <b>Groups:</b>
+    #foreach ( $testGroup in $testGroups )
+    $testGroup
+    #end
+</div>
+<div class="containerNewLine">
+    <div class="description">
+        <div class="column1">
+            <div class="containerNewLine">
+                <div class="title">Started at:</div>
+                <div class="value">$timeStart</div>
+            </div>
+            <div class="containerNewLine">
+                <div class="title">Total time:</div>
+                <div class="value">$duration minutes</div>
+            </div>
+            <div class="containerNewLine">
+                <div class="title">Number of tests:</div>
+                <div class="value">$numberOfTests</div>
+            </div>
+            <div class="containerNewLine">
+                <div class="title">Browser:</div>
+                <div class="value">$browser</div>
+            </div>
+            <div class="containerNewLine">
+                <div class="title">Platform:</div>
+                <div class="value">$platform</div>
+            </div>
+            <div class="containerNewLine">
+                <div class="title">Threads:</div>
+                <div class="value">$numberOfThreads</div>
+            </div>
+        </div>
+    </div>
+    <div class="diagram">
+        <table class="diagramTable">
+            <tr class="diagram-header">
+                <td class="titleStatus" style="background-color:rgb(128, 255, 128)"><a href="#passed">PASSED:</a>
+                    $numberOfSuccess.size()
+                </td>
+                <td class="titleStatus" style="background-color:rgb(255, 255, 149)"><a href="#skipped">SKIPPED:</a>
+                    $numberOfSkipped.size()
+                </td>
+                <td class="titleStatus" style="background-color:rgb(255, 116, 108)"><a href="#failed">FAILED:</a>
+                    $numberOfFailed.size()
+                </td>
+            </tr>
+            <tr>
+                <td id="chart_div1" colspan="3"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="passed">
+    <table border="1" class="bordered" width='100%'>
+        <tbody>
+        <tr>
+            <td colspan='3' align='center' class="titleStatus" style='background-color: rgb(128, 255, 128)'><b>PASSED
+                TESTS</b>
+            </td>
+        </tr>
+        <tr>
+            <th width="250px"><b>Test method</b></th>
+            <th width="auto"><b>Log</b></th>
+            <th width="100px"><b>Time (sec)</b></th>
+        </tr>
+
+        #foreach ( $group in $passedTests )
+        <tr>
+            <td colspan='3' align='center' style='background-color: rgb(204,204,204)'>$group.className</td>
+        </tr>
+        #foreach ($test in $group.testInfos )
+        <tr id="passedTest">
+            <td>
+                <table width="100%">
+                    #foreach( $desc in $test.description )
+                    <tr>
+                        <td>$desc</td>
+                    </tr>
+                    #end
+                </table>
+            </td>
+            <td>
+                <table width="100%" class="logTable" cellspacing="0" cellpadding="0" ;>
+                    #foreach( $log in $test.log )
+                    #if( $velocityCount < $test.log.size() )
+                    <tr>
+                        <td class="logColumn">$log</td>
+                        <td class="logStatus" style="color:green;">PASSED</td>
+                    </tr>
+                    #end
+                    #end
+                </table>
+                <button class='lightButton showMore'>Show Log</button>
+            </td>
+            <td>$test.duration</td>
+        </tr>
+        #end
+        #end
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+</div>
+<div id="failed">
+    <table border="1" class="bordered" width='100%'>
+        <tbody>
+        <tr>
+            <td align="center" class="title" style="background-color: rgb(255, 116, 108)" colspan="7"><b>FAILED
+                TESTS</b>
+            </td>
+        </tr>
+        <tr>
+            <th width=250px><b>Test method</b></th>
+            <th width=100px><b>Known issue</b></th>
+            <th width=auto><b>Log</b></th>
+            <th width=320px><b>Error</b></th>
+            <th width=100px><b>Screenshot</b></th>
+            <th width=100px><b>Details</b></th>
+        </tr>
+        #foreach ( $group in $failedTests )
+        <tr>
+            <td colspan='7' align='center' style='background-color: rgb(204,204,204)'>$group.className</td>
+        </tr>
+        #foreach ($test in $group.testInfos )
+        <tr id="failedTest">
+            <td>
+                <table width="100%">
+                    #foreach( $desc in $test.description )
+                    <tr>
+                        <td>$desc</td>
+                    </tr>
+                    #end
+                </table>
+            </td>
+            <td>
+                $test.ticket
+            </td>
+            <td>
+                <table class="logTableFailed">
+                    #foreach( $log in $test.log )
+                    #set( $value = $test.log.size() - 3 )
+                    #if ($velocityCount > $value)
+                    #if ( $velocityCount == $test.log.size() )
+                    <tr>
+                        <td class="logColumn">$log</td>
+                        <td class="logStatus" style="color:red;">FAILED</td>
+                    </tr>
+                    #else
+                    <tr>
+                        <td class="logColumn">$log</td>
+                        <td class="logStatus" style="color:green;">PASSED</td>
+                    </tr>
+                    #end
+                    #end
+                    #end
+                </table>
+            </td>
+            <td>
+            <textarea style="width:99%;height:100%;word-wrap:break-word;overflow-y:auto;"
+                      onDblClick="this.focus(); this.select();">$test.stackTrace</textarea>
+            </td>
+            <td>
+                <a href="$test.screenshotUrl">screenshot</a><br>
+                <a href="$test.htmlUrl">HTML</a><br>
+            </td>
+            <td align='center'>
+                <button class='lightButton showAddition'>Show</button>
+            </td>
+        </tr>
+        <tr class="additionalRow">
+            <td colspan="7">
+                <table width="100%" height="100%" style="vertical-align:top">
+                    <tr>
+                        <td width="50%">
+                            <div class="title"><b>Test duration:</b> $test.duration</div>
+                            <br>
+                            <table width="100%" class="additionalTable">
+                                #foreach( $log in $test.log )
+                                #if( $velocityCount == $test.log.size() )
+                                <tr>
+                                    <td class="logColumn">$log</td>
+                                    <td class="logStatus" style="color:red;">FAILED</td>
+                                </tr>
+                                #else
+                                <tr>
+                                    <td class="logColumn">$log</td>
+                                    <td class="logStatus" style="color:green;">PASSED</td>
+                                </tr>
+                                #end
+                                #end
+                            </table>
+                        </td>
+                        <td class="screenshotPreviewCell">
+                            <div class="screenshotPreview">
+                                <a href="$test.screenshotUrl" target="_blank">
+                                    <img class="previewImg" alt="" src=""/>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        #end
+        #end
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+</div>
+<div id="skipped">
+    <table border="1" class="bordered" width='100%'>
+        <tbody>
+        <tr>
+            <td colspan='3' class="title" align='center' style='background-color: rgb(255,255,149)'><b>SKIPPED TESTS</b>
+            </td>
+        </tr>
+        <tr>
+            <th width="250px"><b>Test method</b></th>
+            <th width="auto"><b>Time (sec)</b></th>
+        </tr>
+
+        #foreach ( $group in $skippedTests )
+        <tr>
+            <td colspan='2' align='center' style='background-color: rgb(204,204,204)'>$group.className</td>
+        </tr>
+        #foreach ($test in $group.testInfos )
+        <tr id="skippedTest">
+            <td>
+                <table width="100%">
+                    #foreach( $desc in $test.description )
+                    <tr>
+                        <td>$desc</td>
+                    </tr>
+                    #end
+                </table>
+            </td>
+            <td>$test.duration</td>
+        </tr>
+        #end
+        #end
+        </tbody>
+    </table>
+</div>
+</body>
+<script>
+$(function() {
+    $('.logTable').find('tr').hide();
+});
+
+$(document).on('click', '.showMore', function(event) {
+    var $button = $(event.currentTarget);
+    if ($button.text() == 'Hide Log') {
+        $button.closest('tr').find('tr:gt(0)').hide();
+        $button.text('Show Log');
+    } else {
+        $button.closest('tr').find('tr:gt(0)').show();
+        $button.text('Hide Log');
+    }
+});
+
+$(document).on('click', '.showAddition', function(event) {
+    var $button = $(event.currentTarget);
+    if ($button.text() == 'Show') {
+        var $href = $button.closest('tr').next('tr').find('.previewImg').parent().attr('href');
+        $button.closest('tr').next('tr').find('.previewImg').attr('src', $href );
+        $button.closest('tr').next('tr').show();
+        $button.text('Hide');
+    } else {
+        $button.closest('tr').next('tr').hide();
+        $button.text('Show');
+    }
+});
+
+</script>
+</html>

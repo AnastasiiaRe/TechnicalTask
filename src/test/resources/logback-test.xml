@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property scope="context" name="appenderPatternDetail" value="%d{HH:mm:ss.SSS} [%thread] %-5level [%logger{30}.%M:%L] - %msg%n" />
+	<property scope="context" name="appenderPatternTimeAndMessage" value="[%-4level] %d{[HH:mm:ss]} - %msg%n"/>
+
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<encoder>
+			<pattern>${appenderPatternTimeAndMessage}</pattern>
+		</encoder>
+	</appender>
+	<appender name="file" class="ch.qos.logback.core.FileAppender">
+		<file>target/surefire-reports/build.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>${appenderPatternDetail}</pattern>
+		</encoder>
+	</appender>
+	<logger name="org.springframework" level="WARN"/>
+	<logger name="com.mchange.v2" level="WARN"/>
+	<logger name="org.hibernate" level="WARN"/>
+	<root>
+		<appender-ref ref="stdout"/>
+		<appender-ref ref="file"/>
+	</root>
+
+</configuration>
