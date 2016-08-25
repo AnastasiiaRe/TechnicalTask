@@ -49,9 +49,9 @@ public class CheckoutPage extends BasicPage {
 
 	public CheckoutPage chooseLocation() {
 		Logger.info("Choose location from suggestion");
-		int countOfLocation= suggestionLocation.getElementsCount();
+		int countOfLocation = suggestionLocation.getElementsCount();
 		int locationNumber = StringUtils.generateRandomInt(countOfLocation);
-		suggestionLocation.clickOnElementNumber(locationNumber + 1);
+		suggestionLocation.clickOnElementNumber(locationNumber);
 		return this;
 	}
 
@@ -70,6 +70,7 @@ public class CheckoutPage extends BasicPage {
 
 	public CheckoutPage chooseDeliveryMethod() {
 		Logger.info("Choose delivery method");
+		sleepFor(2000); //need for page reloading
 		deliveryMethod.clickOnElementNumber(2);
 		waitForAjaxRequestToBeFinished();
 		return this;
